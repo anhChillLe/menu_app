@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "413733823870",
+    "project_id": "shared-menu",
+    "storage_bucket": "shared-menu.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:413733823870:android:72f4d9a2885b75a4bb7f2f",
+        "android_client_info": {
+          "package_name": "com.bap.menu"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBA7URk3B8LRysRF1F0sU_mOab8DD5Knxk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
