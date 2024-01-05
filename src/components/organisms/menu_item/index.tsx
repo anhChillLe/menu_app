@@ -1,33 +1,73 @@
-import {FC} from 'react'
-import {Image} from 'react-native'
-import {Button, Card, Text} from 'react-native-paper'
-import {FoodData} from '~/services/firebase/type/type'
+import { FC } from 'react'
+import { Image, View } from 'react-native'
+import { Button, Text } from 'react-native-paper'
+import {
+  FBUser,
+  Food,
+  Order,
+  WithId
+} from '~/services/firebase/type/type'
+import { GroupedData } from '~/services/firebase/utils'
 
 interface Props {
-  item: FoodData
+  item: WithId<Food>
+  orderByFood?: GroupedData<Order, 'food'>
+  currentUser: FBUser
   onInsert: () => void
   onRemove: () => void
 }
 
-const MenuItem: FC<Props> = ({item, onInsert, onRemove}) => {
-  const {name, description, price, url} = item
+const MenuItem: FC<Props> = ({
+  item,
+  onInsert,
+  orderByFood,
+  onRemove,
+  currentUser: user,
+}) => {
+  const {name, price, url} = item
+  const isAddedByUser = orderByFood?.data.some(it => it.user.id === user.uid)
 
   return (
-    <Card
-      mode="contained"
-      style={{padding: 16, flex: 1 / 2}}
-      contentStyle={{gap: 4}}>
+    <View style={{flex: 1 / 2, gap: 8, height: 128, flexDirection: 'row'}}>
       <Image source={{uri: url}} style={{aspectRatio: 1, borderRadius: 8}} />
-      <Text numberOfLines={1} variant="titleSmall">
-        {name}
-      </Text>
-      <Text numberOfLines={1} ellipsizeMode="tail" variant="bodySmall">
-        {description}
-      </Text>
-      <Button mode="contained" onPress={onInsert}>
-        Add now
-      </Button>
-    </Card>
+      <View style={{justifyContent: 'space-between'}}>
+        <View>
+          <Text numberOfLines={1} variant="bodyLarge">
+            {name}
+          </Text>
+          <Text
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            variant="titleMedium"
+            style={{fontWeight: 'bold'}}>
+            {price.toComasString()} vnd
+          </Text>
+          <Text
+            variant="labelSmall"
+            style={{fontWeight: 'normal'}}
+            numberOfLines={2}>
+            {orderByFood?.data.map(it => `${it.user.name} x${it.quantity}`).join(', ')}
+          </Text>
+        </View>
+        <View style={{flexDirection: 'row', gap: 8}}>
+          <Button
+            mode="outlined"
+            style={{marginTop: 4}}
+            labelStyle={{fontSize: 12}}
+            onPress={onRemove}
+            disabled={!isAddedByUser}>
+            -
+          </Button>
+          <Button
+            mode="outlined"
+            style={{marginTop: 4}}
+            labelStyle={{fontSize: 12}}
+            onPress={onInsert}>
+            +
+          </Button>
+        </View>
+      </View>
+    </View>
   )
 }
 

@@ -4,86 +4,58 @@ import {
   FC,
   PropsWithChildren,
   createContext,
-  useCallback,
   useContext,
-  useState,
+  useMemo,
+  useState
 } from 'react'
-import {useCollection, useDocument, useQuery} from '~/services/firebase/hook'
+import { useCollection, useDocument } from '~/services/firebase/hook'
 
 import {
   CR,
-  Collection,
   DData,
   DR,
   DS,
-  EateryData,
-  FoodData,
-  MenuData,
-  OrderData,
   QS,
-  SessionData,
-  TableData,
-  UserInsessionData,
+  User,
+  WithId,
 } from '~/services/firebase/type/type'
 
+import { Eatery, Food, Order, Session } from '~/services/firebase/type/type'
+
 interface StoreData {
-  create: (id: string) => void
-  session?: DS<SessionData>
-  menu?: DS<MenuData>
-  table?: DS<TableData>
-  eatery?: DS<EateryData>
-  food?: QS<FoodData>
-  user?: Collection<UserInsessionData>
-  order?: Collection<OrderData>
+  create: (ref: DR<Session>) => void
+  session?: DS<Session>
+  eatery?: DS<Eatery>
+  food?: WithId<Food>[]
+  user?: QS<User>
+  order?: QS<Order>
+  orderRef?: CR<Order>
 }
 
 const SessionContext = createContext<StoreData>({
   create: () => {},
 })
 
-const store = firestore()
-const ssRef = store.collection<SessionData>('session')
-const foodRef = store.collection<FoodData>('food')
-
 const SessionProvider: FC<PropsWithChildren> = ({children}) => {
-  const [ref, setRef] = useState<DR<SessionData>>()
-  const create = useCallback((id: string) => setRef(ssRef.doc(id)), [])
-
+  const [ref, setRef] = useState<DR<Session>>()
+  const orderRef = useMemo(() => getRef<Order>('order', ref?.path), [ref])
   const session = useDocument(ref)
-
-  const menu = useDocument(session?.data()?.menuRef)
-  const table = useDocument(session?.data()?.tableRef)
-
-  const foodQuery = menu ? foodRef.where('menuId', '==', menu.id) : undefined
-  const food = useQuery(foodQuery)
-
-  const eatery = useDocument(table?.data()?.eateryRef)
-
-  const userRef = getRef<UserInsessionData>('user', session?.ref.path)
-  const user = useCollection(userRef)
-
-  const orderRef = getRef<OrderData>('order', session?.ref.path)
   const order = useCollection(orderRef)
+  const food = useMemo(() => session?.data()?.menu.food, [session])
+  const eatery = useDocument(session?.data()?.eateryRef)
+  const userRef = useMemo(() => getRef<User>('user', ref?.path), [ref])
+  const user = useCollection(userRef)
 
   return (
     <SessionContext.Provider
       value={{
-        create,
+        create: setRef,
         session,
-        menu,
         eatery,
-        table,
+        user,
         food,
-        user: user &&
-          userRef && {
-            data: user,
-            ref: userRef,
-          },
-        order: order &&
-          orderRef && {
-            data: order,
-            ref: orderRef,
-          },
+        order,
+        orderRef,
       }}>
       {children}
     </SessionContext.Provider>
@@ -94,6 +66,7 @@ export const useSession = () => useContext(SessionContext)
 
 export default SessionProvider
 
+const store = firestore()
 const getRef = <T extends DData>(name: string, parentPath?: string) => {
   return parentPath ? store.collection<T>(parentPath + '/' + name) : undefined
 }

@@ -13,7 +13,7 @@ const LoginScreen = () => {
     <ImageBackground style={styles.container} source={Images.landing}>
       <StatusBar barStyle="light-content" />
       <Button mode="contained" onPress={login}>
-        Start now
+        Next
       </Button>
     </ImageBackground>
   )

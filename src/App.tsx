@@ -6,12 +6,14 @@ import {AppDarkTheme, AppLightTheme} from '~/wrappers/provider/theme/data'
 import RootStack from './navigation'
 import SessionProvider from '~/wrappers/provider/session'
 import Toast from 'react-native-toast-message'
-import {withOrderChangeListener} from '~/wrappers/hoc/session_listener'
+import {OrderChangeListener} from '~/wrappers/provider/session_listener'
+import './utils/helper'
 
 function App() {
   return (
     <AppProvider>
       <RootStack />
+      <Toast />
     </AppProvider>
   )
 }
@@ -22,12 +24,13 @@ function AppProvider({children}: {children: ReactNode}) {
 
   return (
     <AppThemeProvider value={{colorScheme, isDark, setColorScheme}}>
-      <PaperProvider theme={theme}>
-        <NavigationContainer theme={theme}>
-          <SessionProvider>{withOrderChangeListener(children)}</SessionProvider>
-          <Toast />
-        </NavigationContainer>
-      </PaperProvider>
+      <SessionProvider>
+        <PaperProvider theme={theme}>
+          <NavigationContainer theme={theme}>
+            <OrderChangeListener>{children}</OrderChangeListener>
+          </NavigationContainer>
+        </PaperProvider>
+      </SessionProvider>
     </AppThemeProvider>
   )
 }

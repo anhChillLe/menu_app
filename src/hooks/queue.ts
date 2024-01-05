@@ -1,6 +1,6 @@
 import {useCallback, useState} from 'react'
 
-export function useQueue<T>(initData: T[]) {
+export function useQueue<T>(initData: T[] = []) {
   const [data, setData] = useState<T[]>(initData)
 
   const isEmpty = data.length == 0
@@ -17,10 +17,14 @@ export function useQueue<T>(initData: T[]) {
     }
   }, [data])
 
+  const peek = useCallback(() => {
+    return data[0]
+  }, [data])
+
   return {
     enqueue,
     dequeue,
-    isEmpty,
+    peek,
     data
   }
 }
